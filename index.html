@@ -358,6 +358,9 @@
         const spinner = document.getElementById('loading-spinner');
         
         tableBody.innerHTML = ''; // ล้างค่าเก่า
+        // === ส่วนที่เพิ่มใหม่: เรียงข้อมูลจากวันที่ล่าสุดให้อยู่บนสุด ===
+        data.history.sort((a, b) => b.date.localeCompare(a.date));
+        // ===================================================
         
         data.history.forEach(item => {
           // กำหนดสี: กำไรเป็นสีเขียว ถอนเป็นคลาส withdraw-orange (สีส้ม) ที่เพิ่มไว้ด้านบน
