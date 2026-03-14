@@ -84,6 +84,11 @@
         gap: 10px;
       }
 
+      /* เพิ่มคลาสสีส้มสำหรับตัวเลขการถอน */
+      .withdraw-orange {
+        color: #fd7e14 !important;
+      }
+
       @media (max-width: 576px) {
         .header-gradient { padding: 30px 15px 70px 15px; }
         h1 { font-size: 1.8rem; }
@@ -118,7 +123,7 @@
           <h5 class="fw-bold mb-0" style="color: #1e293b;">
             <i class="fa-solid fa-chart-line text-primary me-2"></i> สรุปกำไรย้อนหลัง 30 วัน
           </h5>
-          <span class="badge bg-success rounded-pill">Update Real-time</span>
+          <span class="badge bg-success rounded-pill">Update ทุกๆ 1 ชม.</span>
         </div>
         <div class="table-responsive">
           <table class="table table-hover mb-0" style="font-size: 0.95rem;">
@@ -334,8 +339,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-  //const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwjxNsIPouVEAd-gHcDs-J-_8VEUlVf2ftmMSmKQyKHk0B12FKQ2lwywASieX6HBFcRxw/exec";
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxKl_CPwuTtWlMsBgtM_2Y7OCGGp8htL3mN0bT00VbyRUuJyiIG97SkuDxwVR_o7dZ1VA/exec";
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyRLltyTr9EKxUHsY5HeVlaseKf0e3C5nnOD-6TWO6zpFdUXWz23WkrcHwhP8Sqp7uqEw/exec";
   
   async function updateDashboard() {
     try {
@@ -356,9 +360,9 @@
         tableBody.innerHTML = ''; // ล้างค่าเก่า
         
         data.history.forEach(item => {
-          // กำหนดสี: กำไรเป็นสีเขียว ถอนเป็นสีแดง
+          // กำหนดสี: กำไรเป็นสีเขียว ถอนเป็นคลาส withdraw-orange (สีส้ม) ที่เพิ่มไว้ด้านบน
           const profitColor = parseFloat(item.profit) > 0 ? 'text-success' : 'text-dark';
-          const withdrawColor = parseFloat(item.withdraw) > 0 ? 'text-danger' : 'text-muted';
+          const withdrawColor = parseFloat(item.withdraw) > 0 ? 'withdraw-orange' : 'text-muted';
           
           const row = `
             <tr class="align-middle">
