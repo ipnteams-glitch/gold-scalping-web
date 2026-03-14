@@ -112,24 +112,33 @@
 
     <div class="main-container">
 
-<div class="action-card" id="profit-history-section" style="display: none;">
-  <div class="card-body">
-    <h5 class="fw-bold mb-3"><i class="fa-solid fa-table"></i> สถิติย้อนหลัง 30 วัน</h5>
-    <div class="table-responsive">
-      <table class="table table-hover text-center" style="font-size: 0.9rem;">
-        <thead class="table-light">
-          <tr>
-            <th>วันที่</th>
-            <th>สรุปกำไร</th>
-            <th>ถอน</th>
-          </tr>
-        </thead>
-        <tbody id="profit-table-body">
-          </tbody>
-      </table>
+    <div class="action-card" id="profit-history-section" style="display: none; border: 1px solid #dee2e6;">
+      <div class="card-body p-0">
+        <div class="p-3 bg-light border-bottom d-flex align-items-center justify-content-between">
+          <h5 class="fw-bold mb-0" style="color: #1e293b;">
+            <i class="fa-solid fa-chart-line text-primary me-2"></i> สรุปกำไรย้อนหลัง 30 วัน
+          </h5>
+          <span class="badge bg-success rounded-pill">Update Real-time</span>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover mb-0" style="font-size: 0.95rem;">
+            <thead class="table-light">
+              <tr class="text-center">
+                <th class="py-3" style="width: 40%;">วันที่</th>
+                <th class="py-3">สรุปกำไร</th>
+                <th class="py-3">ถอน</th>
+              </tr>
+            </thead>
+            <tbody id="profit-table-body" class="text-center">
+              </tbody>
+          </table>
+        </div>
+        <div id="loading-spinner" class="text-center py-4">
+          <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+          <span class="ms-2 small text-muted">กำลังดึงข้อมูล...</span>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
       
       <div class="action-card" style="background: linear-gradient(135deg, #064e3b 0%, #065f46 100%); color: white; border: 1px solid #047857; position: relative;">
         <img src="https://lh3.googleusercontent.com/u/0/d/1oSrztKyQ7Qhosf0f6OCBpqpgZkXDVsqO" style="position: absolute; top: -10px; right: -10px; width: 120px; height: 120px; object-fit: contain; opacity: 1; z-index: 1;" onerror="this.style.display='none'">
@@ -324,44 +333,54 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwjxNsIPouVEAd-gHcDs-J-_8VEUlVf2ftmMSmKQyKHk0B12FKQ2lwywASieX6HBFcRxw/exec";
 
-    <script>
-      // URL ของ API ที่ไปสร้างจากฝั่ง Google Apps Script
-      const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwjxNsIPouVEAd-gHcDs-J-_8VEUlVf2ftmMSmKQyKHk0B12FKQ2lwywASieX6HBFcRxw/exec";
-
-async function getVisitorCount() {
-  try {
-    const response = await fetch(APPS_SCRIPT_URL);
-    const data = await response.json();
-    
-    // แสดงจำนวนผู้เข้าชม
-    if (data && data.view_count) {
-      document.getElementById('visitor-count').innerText = Number(data.view_count).toLocaleString();
-    }
-
-    // แสดงข้อมูลตารางกำไร
-    if (data && data.history && data.history.length > 0) {
-      const tableBody = document.getElementById('profit-table-body');
-      const section = document.getElementById('profit-history-section');
-      tableBody.innerHTML = '';
+  async function updateDashboard() {
+    try {
+      const response = await fetch(APPS_SCRIPT_URL);
+      const data = await response.json();
       
-      data.history.forEach(item => {
-        const row = `<tr>
-          <td>${item.date}</td>
-          <td class="text-success fw-bold">$${Number(item.profit).toFixed(2)}</td>
-          <td class="text-danger">-$${Number(item.withdraw).toFixed(2)}</td>
-        </tr>`;
-        tableBody.innerHTML += row;
-      });
-      section.style.display = 'block'; // แสดงตารางเมื่อมีข้อมูล
-    }
-  } catch (error) {
-    console.error("Error:", error);
-  }
-}
+      // 1. อัปเดตจำนวนผู้เข้าชม
+      if (data.view_count) {
+        document.getElementById('visitor-count').innerText = Number(data.view_count).toLocaleString();
+      }
 
-      // ให้ฟังก์ชันทำงานเมื่อโหลดหน้าเว็บเสร็จ
-      window.onload = getVisitorCount;
-    </script>
+      // 2. อัปเดตตารางกำไร
+      if (data.history && data.history.length > 0) {
+        const tableBody = document.getElementById('profit-table-body');
+        const section = document.getElementById('profit-history-section');
+        const spinner = document.getElementById('loading-spinner');
+        
+        tableBody.innerHTML = ''; // ล้างค่าเก่า
+        
+        data.history.forEach(item => {
+          // กำหนดสี: กำไรเป็นสีเขียว ถอนเป็นสีแดง
+          const profitColor = parseFloat(item.profit) > 0 ? 'text-success' : 'text-dark';
+          const withdrawColor = parseFloat(item.withdraw) > 0 ? 'text-danger' : 'text-muted';
+          
+          const row = `
+            <tr class="align-middle">
+              <td class="fw-bold">${item.date}</td>
+              <td class="${profitColor} fw-bold">$${Number(item.profit).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+              <td class="${withdrawColor}">$${Number(item.withdraw).toLocaleString(undefined, {minimumFractionDigits: 2})}</td>
+            </tr>
+          `;
+          tableBody.innerHTML += row;
+        });
+
+        spinner.style.display = 'none'; // ซ่อนตัวโหลด
+        section.style.display = 'block'; // แสดงตาราง
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      document.getElementById('visitor-count').innerText = "0";
+    }
+  }
+
+  // เรียกทำงานเมื่อโหลดหน้าเว็บ
+  window.onload = updateDashboard;
+</script>
+
   </body>
 </html>
